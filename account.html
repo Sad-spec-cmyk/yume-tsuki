@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0a0a0f" />
   <title>Аккаунт — Yume Tsuki</title>
-  <link rel="stylesheet" href="./styles.css?v=5" />
-  <link rel="stylesheet" href="./browse.css?v=5" />
-  <link rel="stylesheet" href="./account.css?v=5" />
+  <link rel="stylesheet" href="./styles.css?v=6" />
+  <link rel="stylesheet" href="./browse.css?v=6" />
+  <link rel="stylesheet" href="./session.css?v=6" />
+  <link rel="stylesheet" href="./account.css?v=6" />
+  <link rel="stylesheet" href="./chat-widget.css?v=6" />
 </head>
 <body>
   <div class="noise"></div>
@@ -17,7 +19,6 @@
       <a href="./index.html" class="nav-link">Главная</a>
       <a href="./search.html" class="nav-link">Поиск</a>
       <a href="./catalog.html" class="nav-link">Все аниме</a>
-      <a href="./chat.html" class="nav-link">Чат</a>
       <a href="./account.html" class="nav-link active yume-account-link">Аккаунт</a>
     </nav>
   </header>
@@ -61,7 +62,7 @@
           <p id="profileBio">Настрой профиль под себя.</p>
         </div>
         <div class="profile-actions">
-          <a class="btn ghost" href="./chat.html">Открыть чат</a>
+          <button class="btn ghost" type="button" data-yume-open-chat>Открыть чат</button>
           <button id="logoutBtn" class="btn ghost">Выйти</button>
         </div>
       </div>
@@ -99,7 +100,8 @@
     </section>
   </main>
 
-  <script src="./session.js?v=5"></script>
-  <script src="./account.js?v=5"></script>
+  <script src="./session.js?v=6"></script>
+  <script src="./account.js?v=6"></script>
+  <script src="./chat-widget.js?v=6"></script>
 </body>
 </html>
