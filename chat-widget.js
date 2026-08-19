@@ -176,7 +176,9 @@
     renderFooter();
   });
 
+  window.YUME_CHAT = { open, close, toggle, refresh: () => loadMessages(true) };
   shell();
   renderFooter();
   loadMessages();
+  if (location.hash === '#chat') setTimeout(open, 80);
 })();
