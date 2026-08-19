@@ -18,6 +18,8 @@
   function applyAccent(user) {
     if (user?.accent && /^#[0-9a-fA-F]{6}$/.test(user.accent)) {
       document.documentElement.style.setProperty('--accent', user.accent);
+    } else {
+      document.documentElement.style.removeProperty('--accent');
     }
   }
 
@@ -58,6 +60,7 @@
       applyAccent(state.user);
     } catch {
       state.user = null;
+      applyAccent(null);
     } finally {
       state.ready = true;
       renderAccountLink();
@@ -67,8 +70,9 @@
   }
 
   function currentPoster() {
+    const modal = document.querySelector('#modal');
     const modalPoster = document.querySelector('#modalPoster');
-    if (modalPoster?.src) return modalPoster.src;
+    if (modal && !modal.classList.contains('hidden') && modalPoster?.src) return modalPoster.src;
     return '';
   }
 
@@ -97,6 +101,7 @@
 
     const watchButton = event.target.closest('#heroWatch,#watchBtn');
     if (watchButton) {
+      const poster = currentPoster();
       setTimeout(() => {
         const title = document.querySelector('#playerTitle')?.textContent?.trim()
           || document.querySelector('#modalTitle')?.textContent?.trim()
@@ -105,7 +110,7 @@
         recordWatch({
           title,
           episode: '',
-          poster: currentPoster(),
+          poster,
           href: `./search.html?q=${encodeURIComponent(title)}`,
         });
       }, 700);
