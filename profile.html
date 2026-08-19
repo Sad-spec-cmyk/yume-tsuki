@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090a0f" />
+  <title>Профиль — Yume Tsuki</title>
+  <link rel="stylesheet" href="/styles.css?v=9" />
+  <link rel="stylesheet" href="/browse.css?v=9" />
+  <link rel="stylesheet" href="/session.css?v=9" />
+  <link rel="stylesheet" href="/features.css?v=9" />
+  <link rel="stylesheet" href="/chat-widget.css?v=9" />
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar page-topbar">
+    <a class="brand" href="/"><span class="brand-mark">夢</span><span>YUME TSUKI</span></a>
+    <nav class="nav"><a href="/" class="nav-link">Главная</a><a href="/search" class="nav-link">Поиск</a><a href="/catalog" class="nav-link">Все аниме</a></nav>
+  </header>
+  <main class="public-profile-page">
+    <section id="profileLoading" class="public-profile-error"><h1>Загрузка профиля...</h1></section>
+    <section id="publicProfile" class="hidden">
+      <article class="public-profile-shell">
+        <div id="publicCover" class="public-profile-cover"></div>
+        <div class="public-profile-summary">
+          <div id="publicAvatar" class="public-profile-avatar">Y</div>
+          <div class="public-profile-main"><span class="section-kicker">ПРОФИЛЬ</span><h1 id="publicName">Yume User</h1><div id="publicHandle" class="public-profile-handle">@user</div><p id="publicBio" class="public-profile-bio"></p><div id="publicJoined" class="public-profile-meta"></div></div>
+          <a id="editOwnProfile" href="/account" class="btn ghost hidden">Редактировать профиль</a>
+        </div>
+      </article>
+      <section class="public-profile-stats"><article class="public-stat"><strong id="pubTitles">0</strong><span>аниме смотрел</span></article><article class="public-stat"><strong id="pubEpisodes">0</strong><span>серий в истории</span></article><article class="public-stat"><strong id="pubHours">0 ч</strong><span>время просмотра</span></article><article class="public-stat"><strong id="pubFavCount">0</strong><span>в избранном</span></article></section>
+      <section class="public-favorites"><div class="section-head"><div><span class="section-kicker">ИЗБРАННОЕ</span><h2>Сохранённые аниме</h2></div></div><div id="publicFavorites" class="public-favorite-grid"></div><div id="publicFavoritesEmpty" class="empty hidden">Пользователь пока ничего не добавил.</div></section>
+    </section>
+  </main>
+  <script src="/session.js?v=9"></script>
+  <script src="/profile.js?v=9"></script>
+  <script src="/chat-widget.js?v=9"></script>
+</body>
+</html>
