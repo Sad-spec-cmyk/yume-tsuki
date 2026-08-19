@@ -6,11 +6,30 @@ const scrypt = promisify(crypto.scrypt);
 const SESSION_COOKIE = 'yume_session';
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 
+// До этой правки production определялся только через process.env.CONTEXT.
+// В runtime это могло быть undefined, поэтому аккаунты случайно попадали
+// в deploy-specific Blobs и пропадали после следующего деплоя.
+const LEGACY_DEPLOY_IDS = [
+  '6a85f58b3562d00008adb6d1',
+  '6a85f5a4a72ee70008d100a6',
+  '6a85f5f634183a0008d994ea',
+  '6a85f7c9a07a440008d8215b',
+  '6a85f7ef10c56900081eba67',
+];
+
+function isProduction() {
+  return globalThis.Netlify?.context?.deploy?.context === 'production'
+    || process.env.CONTEXT === 'production';
+}
+
 function store(name, strong = false) {
-  const isProd = process.env.CONTEXT === 'production';
-  return isProd
+  return isProduction()
     ? getStore(name, strong ? { consistency: 'strong' } : undefined)
     : getDeployStore(name);
+}
+
+function legacyStore(name, deployID) {
+  return getDeployStore({ name, deployID });
 }
 
 const users = () => store('yume-users', true);
@@ -63,10 +82,60 @@ async function passwordHash(password, salt = crypto.randomBytes(16).toString('he
 }
 
 async function verifyPassword(password, user) {
+  if (!user?.passwordSalt || !user?.passwordHash) return false;
   const { hash } = await passwordHash(password, user.passwordSalt);
   const a = Buffer.from(hash, 'hex');
   const b = Buffer.from(user.passwordHash, 'hex');
   return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+async function migrateLegacyHistory(userId, deployID) {
+  try {
+    const source = legacyStore('yume-history', deployID);
+    const target = history();
+    const prefix = `u/${userId}/`;
+    const { blobs } = await source.list({ prefix });
+    for (const blob of blobs) {
+      const entry = await source.get(blob.key, { type: 'json' });
+      if (entry) await target.setJSON(blob.key, entry);
+    }
+  } catch (error) {
+    console.warn('legacy history migration skipped', deployID, error?.message || error);
+  }
+}
+
+async function migrateLegacyUser(user, deployID) {
+  if (!user?.id) return null;
+  const target = users();
+  await target.setJSON(`u/${user.id}`, user);
+  if (user.email) await target.set(`email/${sha256(cleanEmail(user.email))}`, user.id);
+  if (user.username) await target.set(`username/${sha256(cleanUsername(user.username))}`, user.id);
+  await migrateLegacyHistory(user.id, deployID);
+  return user;
+}
+
+async function findLegacyUserByIdentity(identity, password = null) {
+  const normalized = String(identity || '').trim().toLowerCase();
+  if (!normalized) return null;
+  const indexKey = normalized.includes('@')
+    ? `email/${sha256(normalized)}`
+    : `username/${sha256(normalized)}`;
+
+  for (const deployID of LEGACY_DEPLOY_IDS) {
+    try {
+      const source = legacyStore('yume-users', deployID);
+      const id = await source.get(indexKey);
+      if (!id) continue;
+      const user = await source.get(`u/${id}`, { type: 'json' });
+      if (!user) continue;
+      if (password !== null && !(await verifyPassword(password, user))) continue;
+      await migrateLegacyUser(user, deployID);
+      return user;
+    } catch (error) {
+      console.warn('legacy user lookup skipped', deployID, error?.message || error);
+    }
+  }
+  return null;
 }
 
 async function createSession(userId) {
@@ -80,17 +149,44 @@ async function createSession(userId) {
   return token;
 }
 
+async function recoverLegacySession(token, sessionKey) {
+  for (const deployID of LEGACY_DEPLOY_IDS) {
+    try {
+      const sourceSessions = legacyStore('yume-sessions', deployID);
+      const session = await sourceSessions.get(sessionKey, { type: 'json' });
+      if (!session?.userId || Number(session.expiresAt) < Date.now()) continue;
+      const sourceUsers = legacyStore('yume-users', deployID);
+      const user = await sourceUsers.get(`u/${session.userId}`, { type: 'json' });
+      if (!user) continue;
+      await migrateLegacyUser(user, deployID);
+      await sessions().setJSON(sessionKey, session);
+      return { user, token, sessionKey };
+    } catch (error) {
+      console.warn('legacy session recovery skipped', deployID, error?.message || error);
+    }
+  }
+  return null;
+}
+
 async function getSessionUser(req) {
   const token = parseCookies(req)[SESSION_COOKIE];
   if (!token) return null;
   const sessionKey = `s/${sha256(token)}`;
-  const session = await sessions().get(sessionKey, { type: 'json' });
-  if (!session || !session.userId || Number(session.expiresAt) < Date.now()) {
-    if (session) await sessions().delete(sessionKey);
-    return null;
+  const sessionStore = sessions();
+  const session = await sessionStore.get(sessionKey, { type: 'json' });
+
+  if (session?.userId && Number(session.expiresAt) >= Date.now()) {
+    const user = await users().get(`u/${session.userId}`, { type: 'json' });
+    if (user) return { user, token, sessionKey };
   }
-  const user = await users().get(`u/${session.userId}`, { type: 'json' });
-  return user ? { user, token, sessionKey } : null;
+
+  if (session && Number(session.expiresAt) < Date.now()) {
+    await sessionStore.delete(sessionKey);
+  }
+
+  // Автоматически подхватываем старую сессию из deploy-specific Blobs
+  // и переносим аккаунт в постоянное production-хранилище.
+  return await recoverLegacySession(token, sessionKey);
 }
 
 function sessionCookie(token) {
@@ -128,6 +224,12 @@ async function handleRegister(req) {
     return json({ error: 'Email или логин уже используется.' }, 409);
   }
 
+  // Если аккаунт был создан до исправления persistent storage, не даём
+  // создать дубликат — старый аккаунт теперь можно просто логинить.
+  if (await findLegacyUserByIdentity(email) || await findLegacyUserByIdentity(username)) {
+    return json({ error: 'Этот аккаунт уже существует. Войдите со старым паролем.' }, 409);
+  }
+
   const id = uid();
   const { salt, hash } = await passwordHash(password);
   const user = {
@@ -150,12 +252,23 @@ async function handleLogin(req) {
   const identity = String(data.identity || '').trim().toLowerCase();
   const password = String(data.password || '');
   if (!identity || !password) return json({ error: 'Введите логин/email и пароль.' }, 400);
+
   const userStore = users();
   const indexKey = identity.includes('@') ? `email/${sha256(identity)}` : `username/${sha256(identity)}`;
-  const id = await userStore.get(indexKey);
-  if (!id) return json({ error: 'Неверный логин или пароль.' }, 401);
-  const user = await userStore.get(`u/${id}`, { type: 'json' });
-  if (!user || !(await verifyPassword(password, user))) return json({ error: 'Неверный логин или пароль.' }, 401);
+  let id = await userStore.get(indexKey);
+  let user = id ? await userStore.get(`u/${id}`, { type: 'json' }) : null;
+
+  if (!user || !(await verifyPassword(password, user))) {
+    // Ищем аккаунт в старых deploy-specific Blobs и сразу переносим его
+    // в постоянное production-хранилище. Это чинит аккаунты, которые
+    // переставали логиниться после обновления сайта.
+    user = await findLegacyUserByIdentity(identity, password);
+  }
+
+  if (!user || !(await verifyPassword(password, user))) {
+    return json({ error: 'Неверный логин или пароль.' }, 401);
+  }
+
   const token = await createSession(user.id);
   return json({ user: publicUser(user) }, 200, { 'set-cookie': sessionCookie(token) });
 }
@@ -218,9 +331,32 @@ async function handleHistory(req) {
   return json({ ok: true, entry }, 201);
 }
 
+let legacyChatMigrationPromise = null;
+async function migrateLegacyChat() {
+  if (!isProduction()) return;
+  if (legacyChatMigrationPromise) return legacyChatMigrationPromise;
+  legacyChatMigrationPromise = (async () => {
+    const target = chat();
+    for (const deployID of LEGACY_DEPLOY_IDS) {
+      try {
+        const source = legacyStore('yume-chat', deployID);
+        const { blobs } = await source.list({ prefix: 'm/' });
+        for (const blob of blobs.slice(-100)) {
+          const message = await source.get(blob.key, { type: 'json' });
+          if (message) await target.setJSON(blob.key, message);
+        }
+      } catch (error) {
+        console.warn('legacy chat migration skipped', deployID, error?.message || error);
+      }
+    }
+  })();
+  return legacyChatMigrationPromise;
+}
+
 async function handleChat(req) {
   const c = chat();
   if (req.method === 'GET') {
+    await migrateLegacyChat();
     const { blobs } = await c.list({ prefix: 'm/' });
     const selected = blobs.sort((a, b) => a.key.localeCompare(b.key)).slice(-100);
     const messages = (await Promise.all(selected.map(b => c.get(b.key, { type: 'json' })))).filter(Boolean);
