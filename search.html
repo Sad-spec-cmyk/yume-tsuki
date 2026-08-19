@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Поиск аниме — Yume Tsuki</title>
+  <link rel="stylesheet" href="./styles.css?v=3" />
+  <link rel="stylesheet" href="./browse.css?v=3" />
+</head>
+<body data-page="search">
+  <div class="noise"></div>
+  <header class="topbar page-topbar">
+    <a class="brand" href="./index.html" aria-label="Yume Tsuki">
+      <span class="brand-mark">夢</span><span>YUME TSUKI</span>
+    </a>
+    <nav class="nav">
+      <a href="./index.html" class="nav-link">Главная</a>
+      <a href="./search.html" class="nav-link active">Поиск</a>
+      <a href="./catalog.html" class="nav-link">Все аниме</a>
+    </nav>
+  </header>
+
+  <main class="browse-page">
+    <section class="browse-hero search-page-hero">
+      <span class="section-kicker">ПОИСК ПО КАТАЛОГУ</span>
+      <h1 id="searchHeading">Найди своё аниме</h1>
+      <p>Введи название на русском или английском — результаты появятся сразу.</p>
+      <form id="pageSearchForm" class="big-search">
+        <span class="big-search-icon">⌕</span>
+        <input id="pageSearchInput" autocomplete="off" autofocus placeholder="Например: Атака титанов..." />
+        <button type="button" id="clearSearch" class="search-clear hidden" aria-label="Очистить">×</button>
+        <button class="btn primary" type="submit">Найти</button>
+      </form>
+      <div class="quick-searches">
+        <span>Попробуй:</span>
+        <a href="./search.html?q=Наруто">Наруто</a>
+        <a href="./search.html?q=Атака титанов">Атака титанов</a>
+        <a href="./search.html?q=Клинок">Клинок</a>
+      </div>
+    </section>
+
+    <section class="section browse-results">
+      <div class="section-head">
+        <div><span class="section-kicker">РЕЗУЛЬТАТЫ</span><h2>Найденные тайтлы</h2></div>
+        <span id="status" class="status">Поиск</span>
+      </div>
+      <div id="grid" class="anime-grid"></div>
+      <div id="empty" class="empty"><strong>Введите название аниме</strong><br><small>Можно искать на русском или английском.</small></div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close="modal"></div>
+    <article class="modal-card">
+      <button class="modal-close" data-close="modal">×</button>
+      <div id="modalHero" class="modal-hero"></div>
+      <div class="modal-body">
+        <img id="modalPoster" class="modal-poster" alt="" />
+        <div class="modal-copy">
+          <div class="eyebrow" id="modalType">АНИМЕ</div>
+          <h2 id="modalTitle"></h2>
+          <div id="modalMeta" class="modal-meta"></div>
+          <p id="modalDescription"></p>
+          <div id="modalGenres" class="chips"></div>
+          <div class="modal-actions"><button id="watchBtn" class="btn primary">▶ Смотреть</button></div>
+          <div id="streamingLinks" class="streaming-links"></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div id="playerModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close="player"></div>
+    <article class="player-card">
+      <div class="player-head"><div><span class="section-kicker">ПЛЕЕР</span><h3 id="playerTitle">Аниме</h3></div><button class="modal-close static" data-close="player">×</button></div>
+      <div id="playerBox" class="player-box"></div>
+      <div id="episodes" class="episodes"></div>
+    </article>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js"></script>
+  <script src="./config.js?v=3"></script>
+  <script src="./browse.js?v=3"></script>
+</body>
+</html>
