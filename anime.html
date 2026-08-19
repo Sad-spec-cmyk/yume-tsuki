@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090a0f" />
+  <title>Аниме — Yume Tsuki</title>
+  <link rel="stylesheet" href="./styles.css?v=8" />
+  <link rel="stylesheet" href="./browse.css?v=8" />
+  <link rel="stylesheet" href="./session.css?v=8" />
+  <link rel="stylesheet" href="./anime.css?v=8" />
+  <link rel="stylesheet" href="./chat-widget.css?v=8" />
+</head>
+<body data-page="anime">
+  <div class="noise"></div>
+  <header class="topbar page-topbar">
+    <a class="brand" href="./index.html"><span class="brand-mark">夢</span><span>YUME TSUKI</span></a>
+    <nav class="nav">
+      <a href="./index.html" class="nav-link">Главная</a>
+      <a href="./search.html" class="nav-link">Поиск</a>
+      <a href="./catalog.html" class="nav-link">Все аниме</a>
+    </nav>
+    <a class="header-search-link" href="./search.html">⌕ Найти аниме</a>
+  </header>
+
+  <main class="anime-page">
+    <section id="animeHero" class="anime-hero loading">
+      <div class="anime-hero-shade"></div>
+      <div class="anime-hero-content">
+        <div id="animePosterWrap" class="anime-poster-wrap"><img id="animePoster" alt=""></div>
+        <div class="anime-copy">
+          <span class="section-kicker" id="animeType">АНИМЕ</span>
+          <h1 id="animeTitle">Загрузка...</h1>
+          <div id="animeAltTitle" class="anime-alt"></div>
+          <div id="animeMeta" class="anime-meta"></div>
+          <div id="animeGenres" class="chips anime-genres"></div>
+          <p id="animeDescription" class="anime-description">Получаем информацию через API...</p>
+          <div class="anime-actions">
+            <a class="btn primary" href="#watch">▶ Смотреть</a>
+            <a class="btn ghost" href="#episodesSection">Список серий</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="watch" class="watch-section">
+      <div class="section-head anime-section-head">
+        <div><span class="section-kicker">ПЛЕЕР</span><h2 id="playerHeading">Смотреть онлайн</h2></div>
+        <span id="playerStatus" class="status">Готовим видео...</span>
+      </div>
+
+      <div class="watch-layout">
+        <div class="player-column">
+          <div id="yumePlayer" class="yume-player" tabindex="0">
+            <video id="yumeVideo" playsinline preload="metadata"></video>
+            <div id="playerPoster" class="player-poster-layer"></div>
+            <div class="player-vignette"></div>
+            <button id="centerPlay" class="center-play" type="button" aria-label="Воспроизвести">▶</button>
+            <div class="player-topline">
+              <div><span class="player-brand-dot"></span><span>YUME PLAYER</span></div>
+              <div class="player-badges"><span id="currentEpisodeBadge">Серия —</span><span id="currentQualityBadge">—</span></div>
+            </div>
+            <div id="playerControls" class="player-controls">
+              <input id="progress" class="progress" type="range" min="0" max="1000" value="0" aria-label="Прогресс">
+              <div class="control-row">
+                <button id="playBtn" class="control-btn primary-control" type="button" aria-label="Пауза">▶</button>
+                <button id="backBtn" class="control-btn" type="button" aria-label="Назад 10 секунд">↶10</button>
+                <button id="forwardBtn" class="control-btn" type="button" aria-label="Вперёд 10 секунд">10↷</button>
+                <span id="timeLabel" class="time-label">0:00 / 0:00</span>
+                <div class="control-spacer"></div>
+                <button id="muteBtn" class="control-btn" type="button" aria-label="Звук">🔊</button>
+                <input id="volume" class="volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Громкость">
+                <select id="speedSelect" class="player-select" aria-label="Скорость"><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+                <select id="qualitySelect" class="player-select" aria-label="Качество"></select>
+                <button id="fullscreenBtn" class="control-btn" type="button" aria-label="На весь экран">⛶</button>
+              </div>
+            </div>
+            <div id="playerMessage" class="player-message hidden"></div>
+          </div>
+
+          <div class="now-playing-bar">
+            <div><span class="section-kicker">СЕЙЧАС</span><strong id="nowPlayingTitle">Выберите серию</strong><span id="nowPlayingSubtitle"></span></div>
+            <div class="player-hints"><span>Space — пауза</span><span>←/→ — 5 сек</span><span>F — полный экран</span></div>
+          </div>
+        </div>
+
+        <aside class="anime-sidebar">
+          <section class="side-card">
+            <span class="section-kicker">ИНФОРМАЦИЯ</span><h3>О релизе</h3>
+            <dl id="infoList" class="info-list"></dl>
+          </section>
+          <section class="side-card quick-stats">
+            <div><strong id="sideEpisodes">0</strong><span>серий</span></div>
+            <div><strong id="sideYear">—</strong><span>год</span></div>
+            <div><strong id="sideStatus">—</strong><span>статус</span></div>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section id="episodesSection" class="episodes-section">
+      <div class="section-head anime-section-head">
+        <div><span class="section-kicker">ЭПИЗОДЫ</span><h2>Список серий</h2></div>
+        <span id="episodeCount" class="status">0 серий</span>
+      </div>
+      <div id="episodesList" class="episodes-list"></div>
+    </section>
+
+    <section class="about-section">
+      <div class="about-grid">
+        <article class="about-card">
+          <span class="section-kicker">ОБ АНИМЕ</span><h2 id="aboutTitle">Описание</h2><p id="aboutDescription"></p>
+        </article>
+        <article class="about-card">
+          <span class="section-kicker">ДЕТАЛИ</span><h2>Техническая информация</h2><div id="technicalInfo" class="technical-grid"></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js"></script>
+  <script src="./config.js?v=8"></script>
+  <script src="./session.js?v=8"></script>
+  <script src="./anime.js?v=8"></script>
+  <script src="./chat-widget.js?v=8"></script>
+</body>
+</html>
