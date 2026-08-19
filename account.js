@@ -4,28 +4,41 @@
   const authView = $('#authView');
   const profileView = $('#profileView');
   const esc = v => String(v ?? '').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  let currentUser = null;
 
   function status(name, text='', type=''){
     const el = document.querySelector(`[data-status="${name}"]`);
     if(!el) return;
     el.textContent=text; el.className=`form-status ${type}`;
   }
+  function initial(user){ return (user?.displayName || user?.username || 'Y').trim().slice(0,1).toUpperCase() || 'Y'; }
+  function setAvatar(el, user){
+    if(!el) return;
+    if(user?.avatarUrl){ el.innerHTML=`<img src="${esc(user.avatarUrl)}" alt="">`; }
+    else el.innerHTML=`<span>${esc(initial(user))}</span>`;
+  }
 
   function renderUser(user){
+    currentUser = user || null;
     const logged = !!user;
     authView.classList.toggle('hidden', logged);
     profileView.classList.toggle('hidden', !logged);
     if(!user) return;
-    $('#profileAvatar').textContent=user.avatar||'🌙';
-    $('#previewAvatar').textContent=user.avatar||'🌙';
+    setAvatar($('#profileAvatar'), user);
+    setAvatar($('#previewAvatar'), user);
     $('#profileName').textContent=user.displayName||user.username;
     $('#profileHandle').textContent=`@${user.username}`;
     $('#profileBio').textContent=user.bio||'Настрой профиль под себя.';
     $('#displayNameInput').value=user.displayName||user.username;
     $('#bioInput').value=user.bio||'';
-    $('#avatarInput').value=user.avatar||'🌙';
     $('#accentInput').value=user.accent||'#ff395f';
+    $('#accentValue').textContent=user.accent||'#ff395f';
+    const joined = user.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'}) : '';
+    $('#profileJoined').textContent = joined ? `С нами с ${joined}` : 'Профиль Yume Tsuki';
+    const cover=$('#profileCover');
+    cover.style.backgroundImage=user.bannerUrl ? `linear-gradient(180deg,rgba(7,8,12,.04),rgba(7,8,12,.68)),url('${String(user.bannerUrl).replaceAll("'","%27")}')` : '';
     loadHistory();
+    loadStats();
   }
 
   async function submitAuth(form, action, key){
@@ -53,37 +66,105 @@
     }catch(err){status('profile',err.message,'error');}
   });
 
-  $('#avatarPresets').addEventListener('click',e=>{
-    const b=e.target.closest('button'); if(!b)return;
-    $('#avatarInput').value=b.textContent.trim(); $('#previewAvatar').textContent=b.textContent.trim();
+  $('#accentInput').addEventListener('input',e=>{
+    document.documentElement.style.setProperty('--accent',e.target.value);
+    $('#accentValue').textContent=e.target.value;
   });
-  $('#avatarInput').addEventListener('input',e=>$('#previewAvatar').textContent=e.target.value||'🌙');
-  $('#accentInput').addEventListener('input',e=>document.documentElement.style.setProperty('--accent',e.target.value));
 
   $('#logoutBtn').addEventListener('click',async()=>{
     try{await api('logout',{method:'POST',body:'{}'});}catch{}
     window.YUME_ACCOUNT.setUser(null); renderUser(null);
   });
 
+  function cropToDataUrl(file, width, height, quality=.86){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onerror=()=>reject(new Error('Не удалось прочитать изображение.'));
+      reader.onload=()=>{
+        const img=new Image();
+        img.onerror=()=>reject(new Error('Не удалось открыть изображение.'));
+        img.onload=()=>{
+          const canvas=document.createElement('canvas'); canvas.width=width; canvas.height=height;
+          const ctx=canvas.getContext('2d');
+          const scale=Math.max(width/img.width,height/img.height);
+          const sw=width/scale, sh=height/scale;
+          const sx=(img.width-sw)/2, sy=(img.height-sh)/2;
+          ctx.drawImage(img,sx,sy,sw,sh,0,0,width,height);
+          resolve(canvas.toDataURL('image/webp',quality));
+        };
+        img.src=reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function uploadPhoto(file, kind){
+    if(!file) return;
+    const target=kind==='avatar'?$('#profileAvatar'):$('#profileCover');
+    target.classList.add('uploading');
+    try{
+      const dataUrl=await cropToDataUrl(file, kind==='avatar'?512:1600, kind==='avatar'?512:520, kind==='avatar' ? .9 : .84);
+      if(kind==='avatar') $('#profileAvatar').innerHTML=`<img src="${dataUrl}" alt="">`;
+      else $('#profileCover').style.backgroundImage=`linear-gradient(180deg,rgba(7,8,12,.04),rgba(7,8,12,.68)),url('${dataUrl}')`;
+      const result=await api('media',{method:'POST',body:JSON.stringify({kind,dataUrl})});
+      window.YUME_ACCOUNT.setUser(result.user); renderUser(result.user);
+    }catch(e){alert(e.message||'Не удалось загрузить фото.');}
+    finally{target.classList.remove('uploading');}
+  }
+
+  $('#changeAvatarBtn').addEventListener('click',()=>$('#avatarFile').click());
+  $('#changeBannerBtn').addEventListener('click',()=>$('#bannerFile').click());
+  $('#avatarFile').addEventListener('change',e=>uploadPhoto(e.target.files?.[0],'avatar'));
+  $('#bannerFile').addEventListener('change',e=>uploadPhoto(e.target.files?.[0],'banner'));
+
   async function loadHistory(){
     $('#historyStatus').textContent='Загрузка...';
     try{
       const {items=[]}=await api('history',{method:'GET',headers:{}});
-      $('#historyCount').textContent=items.length;
       $('#historyStatus').textContent=`${items.length} тайтлов`;
+      $('#historyCountBadge').textContent=`${items.length} тайтлов`;
       const grid=$('#historyGrid'), empty=$('#historyEmpty');
       grid.innerHTML=items.map(item=>{
         const date=item.watchedAt?new Date(item.watchedAt).toLocaleDateString('ru-RU',{day:'2-digit',month:'short'}):'';
-        const href=item.href||`./search.html?q=${encodeURIComponent(item.title||'')}`;
-        return `<a class="history-item" href="${esc(href)}"><img class="history-poster" src="${esc(item.poster||'')}" alt="" onerror="this.style.visibility='hidden'"><div class="history-copy"><strong>${esc(item.title)}</strong><span>${esc(item.episode||'Просмотр начат')}${date?` · ${esc(date)}`:''}</span></div></a>`;
+        const href=item.href||`./anime.html?q=${encodeURIComponent(item.title||'')}`;
+        const progress=item.duration>0?Math.min(100,Math.round((item.lastPosition/item.duration)*100)):0;
+        return `<a class="history-item" href="${esc(href)}"><img class="history-poster" src="${esc(item.poster||'')}" alt="" onerror="this.style.visibility='hidden'"><div class="history-copy"><strong>${esc(item.title)}</strong><span>${esc(item.episode||'Просмотр начат')}${date?` · ${esc(date)}`:''}</span>${progress?`<div class="history-progress"><i style="width:${progress}%"></i></div>`:''}</div></a>`;
       }).join('');
       empty.classList.toggle('hidden',items.length>0);
     }catch(e){$('#historyStatus').textContent='Ошибка';}
   }
 
+  function formatHours(value){
+    const n=Number(value||0); if(n<1) return `${Math.round(n*60)} мин`; return `${n.toFixed(n<10?1:0)} ч`;
+  }
+  async function loadStats(){
+    try{
+      const s=await api('stats',{method:'GET',headers:{}});
+      $('#statTitles').textContent=s.titles||0;
+      $('#statEpisodes').textContent=s.episodes||0;
+      $('#statHours').textContent=formatHours(s.watchHours||0);
+      $('#statStreak').textContent=s.streak||0;
+      $('#completedEpisodes').textContent=s.completed||0;
+      $('#activityDaysSmall').textContent=s.activityDays||0;
+      $('#activityDays').textContent=`${s.activityDays||0} активных дней`;
+      $('#activityTotal').textContent=formatHours(s.watchHours||0);
+      $('#donutValue').textContent=s.episodes||0;
+      const ratio=s.episodes?Math.min(100,Math.round(((s.completed||0)/s.episodes)*100)):0;
+      $('#watchDonut').style.setProperty('--donut',`${ratio}%`);
+      const max=Math.max(1,...(s.last14||[]).map(d=>Number(d.watchSeconds||0)));
+      $('#activityChart').innerHTML=(s.last14||[]).map(d=>{
+        const minutes=Math.round((d.watchSeconds||0)/60);
+        const h=Math.max(5,Math.round((Number(d.watchSeconds||0)/max)*100));
+        const day=new Date(`${d.date}T12:00:00Z`).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});
+        return `<div class="activity-bar" style="height:${h}%" data-label="${day} · ${minutes} мин"></div>`;
+      }).join('');
+      $('#genreStats').innerHTML=(s.genres||[]).length?(s.genres||[]).map(g=>`<span class="genre-chip">${esc(g.name)} <b>${g.count}</b></span>`).join(''):'<span class="muted">Пока недостаточно данных</span>';
+    }catch{}
+  }
+
   $('#clearHistoryBtn').addEventListener('click',async()=>{
-    if(!confirm('Очистить всю историю просмотра?')) return;
-    try{await api('history',{method:'DELETE',body:'{}'});loadHistory();}catch(e){alert(e.message);}
+    if(!confirm('Очистить всю историю и статистику просмотра?')) return;
+    try{await api('history',{method:'DELETE',body:'{}'});loadHistory();loadStats();}catch(e){alert(e.message);}
   });
 
   document.addEventListener('yume:session',e=>renderUser(e.detail.user));
