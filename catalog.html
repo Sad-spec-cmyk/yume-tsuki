@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Все аниме — Yume Tsuki</title>
+  <link rel="stylesheet" href="./styles.css?v=3" />
+  <link rel="stylesheet" href="./browse.css?v=3" />
+</head>
+<body data-page="catalog">
+  <div class="noise"></div>
+  <header class="topbar page-topbar">
+    <a class="brand" href="./index.html" aria-label="Yume Tsuki"><span class="brand-mark">夢</span><span>YUME TSUKI</span></a>
+    <nav class="nav">
+      <a href="./index.html" class="nav-link">Главная</a>
+      <a href="./search.html" class="nav-link">Поиск</a>
+      <a href="./catalog.html" class="nav-link active">Все аниме</a>
+    </nav>
+    <a class="header-search-link" href="./search.html">⌕ Найти аниме</a>
+  </header>
+
+  <main class="browse-page">
+    <section class="browse-hero catalog-page-hero">
+      <span class="section-kicker">ПОЛНЫЙ КАТАЛОГ</span>
+      <h1>Все аниме</h1>
+      <p>Весь каталог Yume Tsuki. Листай вниз — следующие страницы подгружаются автоматически.</p>
+      <div class="catalog-toolbar">
+        <label for="catalogSort">Сортировка</label>
+        <select id="catalogSort">
+          <option value="FRESH_AT_DESC">Сначала новые</option>
+          <option value="POPULARITY_DESC">По популярности</option>
+        </select>
+        <a class="btn ghost" href="./search.html">⌕ Поиск по названию</a>
+      </div>
+    </section>
+
+    <section class="section browse-results">
+      <div class="section-head">
+        <div><span class="section-kicker">КАТАЛОГ</span><h2>Все доступные тайтлы</h2></div>
+        <span id="status" class="status">Загрузка...</span>
+      </div>
+      <div id="grid" class="anime-grid"></div>
+      <div id="empty" class="empty hidden">Каталог пуст.</div>
+      <div class="load-more-wrap"><button id="loadMore" class="btn ghost load-more">Загрузить ещё</button></div>
+      <div id="catalogSentinel" class="catalog-sentinel">Загружаем дальше при прокрутке…</div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close="modal"></div>
+    <article class="modal-card">
+      <button class="modal-close" data-close="modal">×</button>
+      <div id="modalHero" class="modal-hero"></div>
+      <div class="modal-body">
+        <img id="modalPoster" class="modal-poster" alt="" />
+        <div class="modal-copy">
+          <div class="eyebrow" id="modalType">АНИМЕ</div>
+          <h2 id="modalTitle"></h2>
+          <div id="modalMeta" class="modal-meta"></div>
+          <p id="modalDescription"></p>
+          <div id="modalGenres" class="chips"></div>
+          <div class="modal-actions"><button id="watchBtn" class="btn primary">▶ Смотреть</button></div>
+          <div id="streamingLinks" class="streaming-links"></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div id="playerModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close="player"></div>
+    <article class="player-card">
+      <div class="player-head"><div><span class="section-kicker">ПЛЕЕР</span><h3 id="playerTitle">Аниме</h3></div><button class="modal-close static" data-close="player">×</button></div>
+      <div id="playerBox" class="player-box"></div>
+      <div id="episodes" class="episodes"></div>
+    </article>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js"></script>
+  <script src="./config.js?v=3"></script>
+  <script src="./browse.js?v=3"></script>
+</body>
+</html>
