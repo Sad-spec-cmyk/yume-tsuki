@@ -26,13 +26,7 @@
   function ensureNavLinks() {
     const nav = document.querySelector('.topbar .nav');
     if (!nav) return;
-    if (!nav.querySelector('a[href*="chat.html"]')) {
-      const chat = document.createElement('a');
-      chat.href = './chat.html';
-      chat.className = 'nav-link yume-extra-nav';
-      chat.textContent = 'Чат';
-      nav.appendChild(chat);
-    }
+    nav.querySelectorAll('a[href*="chat.html"]').forEach(link => link.remove());
     if (!nav.querySelector('a[href*="account.html"]')) {
       const account = document.createElement('a');
       account.href = './account.html';
