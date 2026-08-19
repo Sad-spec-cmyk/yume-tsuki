@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Yume — смотреть аниме</title>
+  <link rel="preconnect" href="https://api.anilibria.app" />
+  <link rel="preconnect" href="https://aniliberty.top" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Yume">
+      <span class="brand-mark">夢</span>
+      <span>YUME</span>
+    </a>
+
+    <nav class="nav">
+      <button data-view="home" class="nav-link active">Главная</button>
+      <button data-view="top" class="nav-link">Топ</button>
+      <button data-view="season" class="nav-link">Сейчас выходят</button>
+    </nav>
+
+    <form id="searchForm" class="search">
+      <input id="searchInput" autocomplete="off" placeholder="Поиск аниме..." />
+      <button aria-label="Поиск">⌕</button>
+    </form>
+  </header>
+
+  <main>
+    <section id="hero" class="hero">
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <div class="eyebrow">АНИМЕ ОНЛАЙН</div>
+        <h1 id="heroTitle">Загрузка...</h1>
+        <p id="heroText">Каталог, русские названия и серии загружаются через API.</p>
+        <div class="hero-meta" id="heroMeta"></div>
+        <div class="hero-actions">
+          <button id="heroWatch" class="btn primary">▶ Смотреть</button>
+          <button id="heroMore" class="btn ghost">Подробнее</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker" id="sectionKicker">ПОПУЛЯРНОЕ</span>
+          <h2 id="sectionTitle">Сейчас смотрят</h2>
+        </div>
+        <span id="status" class="status">API</span>
+      </div>
+      <div id="grid" class="anime-grid"></div>
+      <div id="empty" class="empty hidden">Ничего не найдено.</div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close="modal"></div>
+    <article class="modal-card">
+      <button class="modal-close" data-close="modal">×</button>
+      <div id="modalHero" class="modal-hero"></div>
+      <div class="modal-body">
+        <img id="modalPoster" class="modal-poster" alt="" />
+        <div class="modal-copy">
+          <div class="eyebrow" id="modalType">АНИМЕ</div>
+          <h2 id="modalTitle"></h2>
+          <div id="modalMeta" class="modal-meta"></div>
+          <p id="modalDescription"></p>
+          <div id="modalGenres" class="chips"></div>
+          <div class="modal-actions">
+            <button id="watchBtn" class="btn primary">▶ Смотреть</button>
+            <button id="trailerBtn" class="btn ghost">Трейлер</button>
+          </div>
+          <div id="streamingLinks" class="streaming-links"></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div id="playerModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" data-close="player"></div>
+    <article class="player-card">
+      <div class="player-head">
+        <div>
+          <span class="section-kicker">ПЛЕЕР</span>
+          <h3 id="playerTitle">Аниме</h3>
+        </div>
+        <button class="modal-close static" data-close="player">×</button>
+      </div>
+      <div id="playerBox" class="player-box">
+        <div class="player-placeholder">
+          <div class="play-icon">▶</div>
+          <h3>Загрузка плеера</h3>
+          <p>Серии загружаются автоматически через AniLiberty API.</p>
+        </div>
+      </div>
+      <div id="episodes" class="episodes"></div>
+    </article>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js"></script>
+  <script src="./config.js?v=2"></script>
+  <script src="./app.js?v=2"></script>
+</body>
+</html>
