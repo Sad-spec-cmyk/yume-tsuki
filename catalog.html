@@ -7,6 +7,7 @@
   <title>Все аниме — Yume Tsuki</title>
   <link rel="stylesheet" href="./styles.css?v=3" />
   <link rel="stylesheet" href="./browse.css?v=3" />
+  <link rel="stylesheet" href="./catalog-filters.css?v=4" />
 </head>
 <body data-page="catalog">
   <div class="noise"></div>
@@ -24,14 +25,70 @@
     <section class="browse-hero catalog-page-hero">
       <span class="section-kicker">ПОЛНЫЙ КАТАЛОГ</span>
       <h1>Все аниме</h1>
-      <p>Весь каталог Yume Tsuki. Листай вниз — следующие страницы подгружаются автоматически.</p>
-      <div class="catalog-toolbar">
-        <label for="catalogSort">Сортировка</label>
-        <select id="catalogSort">
-          <option value="FRESH_AT_DESC">Сначала новые</option>
-          <option value="POPULARITY_DESC">По популярности</option>
-        </select>
-        <a class="btn ghost" href="./search.html">⌕ Поиск по названию</a>
+      <p>Весь каталог Yume Tsuki. Используй быстрый поиск и категории, чтобы сразу отфильтровать нужные тайтлы.</p>
+
+      <div class="catalog-filter-shell">
+        <div class="catalog-toolbar advanced-toolbar">
+          <button id="filterToggle" class="filter-toggle" type="button" aria-expanded="false" aria-controls="filterPanel">
+            <span class="filter-toggle-icon">☷</span>
+            <span id="filterToggleText">Выбрать категории</span>
+            <span id="filterCount" class="filter-count hidden">0</span>
+          </button>
+
+          <label class="catalog-quick-search" for="catalogQuickSearch">
+            <span>⌕</span>
+            <input id="catalogQuickSearch" autocomplete="off" placeholder="Быстрый поиск..." />
+            <button id="catalogQuickClear" class="quick-clear hidden" type="button" aria-label="Очистить поиск">×</button>
+          </label>
+
+          <a class="btn ghost toolbar-search-page" href="./search.html">Расширенный поиск</a>
+        </div>
+
+        <section id="filterPanel" class="filter-panel hidden" aria-label="Фильтры каталога">
+          <div class="filter-panel-head">
+            <div>
+              <span class="section-kicker">ФИЛЬТРЫ</span>
+              <h2>Категории аниме</h2>
+            </div>
+            <button id="filterClose" class="filter-panel-close" type="button" aria-label="Закрыть">×</button>
+          </div>
+
+          <div class="filter-layout">
+            <section class="filter-block filter-block-genres">
+              <h3>Жанр</h3>
+              <div id="genreFilters" class="filter-options filter-options-genres">
+                <span class="filter-loading">Загружаем жанры...</span>
+              </div>
+            </section>
+
+            <div class="filter-side-column">
+              <section class="filter-block">
+                <h3>Год выпуска</h3>
+                <div id="yearFilters" class="filter-options"></div>
+              </section>
+
+              <section class="filter-block">
+                <h3>Сортировка</h3>
+                <div id="sortFilters" class="filter-options">
+                  <label class="filter-choice"><input type="radio" name="catalogSortRadio" value="2" checked><span>Сначала новые</span></label>
+                  <label class="filter-choice"><input type="radio" name="catalogSortRadio" value="1"><span>По популярности</span></label>
+                </div>
+              </section>
+            </div>
+
+            <section class="filter-block filter-block-types">
+              <h3>Тип</h3>
+              <div id="typeFilters" class="filter-options filter-options-types">
+                <span class="filter-loading">Загружаем типы...</span>
+              </div>
+            </section>
+          </div>
+
+          <div class="filter-panel-footer">
+            <button id="filterReset" class="btn ghost" type="button">Сбросить</button>
+            <button id="filterApply" class="btn primary" type="button">OK</button>
+          </div>
+        </section>
       </div>
     </section>
 
@@ -40,6 +97,7 @@
         <div><span class="section-kicker">КАТАЛОГ</span><h2>Все доступные тайтлы</h2></div>
         <span id="status" class="status">Загрузка...</span>
       </div>
+      <div id="activeFilters" class="active-filters hidden"></div>
       <div id="grid" class="anime-grid"></div>
       <div id="empty" class="empty hidden">Каталог пуст.</div>
       <div class="load-more-wrap"><button id="loadMore" class="btn ghost load-more">Загрузить ещё</button></div>
@@ -79,5 +137,6 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js"></script>
   <script src="./config.js?v=3"></script>
   <script src="./browse.js?v=3"></script>
+  <script src="./catalog-filters.js?v=4"></script>
 </body>
 </html>
