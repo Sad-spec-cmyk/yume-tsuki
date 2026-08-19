@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Аккаунт — Yume Tsuki</title>
+  <link rel="stylesheet" href="./styles.css?v=5" />
+  <link rel="stylesheet" href="./browse.css?v=5" />
+  <link rel="stylesheet" href="./account.css?v=5" />
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar page-topbar">
+    <a class="brand" href="./index.html"><span class="brand-mark">夢</span><span>YUME TSUKI</span></a>
+    <nav class="nav">
+      <a href="./index.html" class="nav-link">Главная</a>
+      <a href="./search.html" class="nav-link">Поиск</a>
+      <a href="./catalog.html" class="nav-link">Все аниме</a>
+      <a href="./chat.html" class="nav-link">Чат</a>
+      <a href="./account.html" class="nav-link active yume-account-link">Аккаунт</a>
+    </nav>
+  </header>
+
+  <main class="account-page">
+    <section id="authView" class="auth-view">
+      <div class="auth-intro">
+        <span class="section-kicker">YUME ID</span>
+        <h1>Твой аккаунт</h1>
+        <p>История просмотра, персональный профиль и доступ к общему чату — всё хранится в аккаунте.</p>
+      </div>
+      <div class="auth-grid">
+        <form id="loginForm" class="account-card auth-card">
+          <span class="section-kicker">ВХОД</span>
+          <h2>С возвращением</h2>
+          <label>Логин или email<input name="identity" autocomplete="username" required placeholder="username или mail@example.com"></label>
+          <label>Пароль<input name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="••••••••"></label>
+          <button class="btn primary" type="submit">Войти</button>
+          <p class="form-status" data-status="login"></p>
+        </form>
+
+        <form id="registerForm" class="account-card auth-card">
+          <span class="section-kicker">РЕГИСТРАЦИЯ</span>
+          <h2>Создать аккаунт</h2>
+          <label>Email<input name="email" type="email" autocomplete="email" required placeholder="mail@example.com"></label>
+          <label>Логин<input name="username" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" placeholder="yume_user"></label>
+          <label>Пароль<input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="128" placeholder="Минимум 8 символов"></label>
+          <button class="btn primary" type="submit">Зарегистрироваться</button>
+          <p class="form-status" data-status="register"></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="profileView" class="profile-view hidden">
+      <div class="profile-hero account-card">
+        <div id="profileAvatar" class="profile-avatar">🌙</div>
+        <div class="profile-main">
+          <span class="section-kicker">ПРОФИЛЬ</span>
+          <h1 id="profileName">Yume User</h1>
+          <div class="profile-handle" id="profileHandle">@user</div>
+          <p id="profileBio">Настрой профиль под себя.</p>
+        </div>
+        <div class="profile-actions">
+          <a class="btn ghost" href="./chat.html">Открыть чат</a>
+          <button id="logoutBtn" class="btn ghost">Выйти</button>
+        </div>
+      </div>
+
+      <div class="account-grid">
+        <form id="profileForm" class="account-card customization-card">
+          <div class="card-title"><div><span class="section-kicker">КАСТОМИЗАЦИЯ</span><h2>Оформление аккаунта</h2></div><div id="previewAvatar" class="small-profile-avatar">🌙</div></div>
+          <label>Отображаемое имя<input id="displayNameInput" name="displayName" maxlength="30" required></label>
+          <label>О себе<textarea id="bioInput" name="bio" maxlength="180" rows="4" placeholder="Пару слов о себе..."></textarea></label>
+          <div class="form-row">
+            <label>Аватар-эмодзи<input id="avatarInput" name="avatar" maxlength="8" placeholder="🌙"></label>
+            <label>Цвет профиля<input id="accentInput" name="accent" type="color" value="#ff395f"></label>
+          </div>
+          <div class="avatar-presets" id="avatarPresets">
+            <button type="button">🌙</button><button type="button">🌸</button><button type="button">⚔️</button><button type="button">🦊</button><button type="button">👻</button><button type="button">🔥</button><button type="button">✨</button><button type="button">🐉</button>
+          </div>
+          <button class="btn primary" type="submit">Сохранить профиль</button>
+          <p class="form-status" data-status="profile"></p>
+        </form>
+
+        <section class="account-card stats-card">
+          <span class="section-kicker">БИБЛИОТЕКА</span>
+          <h2>История просмотра</h2>
+          <div class="profile-stat"><strong id="historyCount">0</strong><span>аниме в истории</span></div>
+          <p>Тайтл добавляется автоматически, когда ты запускаешь просмотр или выбираешь серию.</p>
+          <button id="clearHistoryBtn" class="btn ghost" type="button">Очистить историю</button>
+        </section>
+      </div>
+
+      <section class="history-section">
+        <div class="section-head"><div><span class="section-kicker">ПРОСМОТРЕНО</span><h2>Последние просмотры</h2></div><span id="historyStatus" class="status">Загрузка...</span></div>
+        <div id="historyGrid" class="history-grid"></div>
+        <div id="historyEmpty" class="empty hidden">История пока пустая. Запусти любое аниме — оно появится здесь.</div>
+      </section>
+    </section>
+  </main>
+
+  <script src="./session.js?v=5"></script>
+  <script src="./account.js?v=5"></script>
+</body>
+</html>
