@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="12" y1="8" x2="116" y2="120" gradientUnits="userSpaceOnUse"><stop stop-color="#ff3d67"/><stop offset=".55" stop-color="#d63ecf"/><stop offset="1" stop-color="#7357ff"/></linearGradient>
+    <linearGradient id="moon" x1="40" y1="28" x2="86" y2="98" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#ffe9f4"/></linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect x="6" y="6" width="116" height="116" rx="31" fill="#090a0f"/>
+  <rect x="9" y="9" width="110" height="110" rx="28" fill="url(#bg)" opacity=".16"/>
+  <path d="M84 25c-21 5-34 20-34 39 0 18 12 34 31 39-6 3-13 5-20 5-25 0-45-20-45-45s20-45 45-45c8 0 16 2 23 7Z" fill="url(#moon)" filter="url(#glow)"/>
+  <path d="M88 34l4.6 9.4L103 48l-10.4 4.6L88 63l-4.6-10.4L73 48l10.4-4.6L88 34Z" fill="#ff5d89"/>
+  <circle cx="91" cy="79" r="5" fill="#a876ff"/>
+  <path d="M70 82c6 8 14 13 24 15" fill="none" stroke="#ff5d89" stroke-width="5" stroke-linecap="round"/>
+</svg>
