@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Общий чат — Yume Tsuki</title>
+  <link rel="stylesheet" href="./styles.css?v=5" />
+  <link rel="stylesheet" href="./browse.css?v=5" />
+  <link rel="stylesheet" href="./account.css?v=5" />
+  <link rel="stylesheet" href="./chat.css?v=5" />
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar page-topbar">
+    <a class="brand" href="./index.html"><span class="brand-mark">夢</span><span>YUME TSUKI</span></a>
+    <nav class="nav">
+      <a href="./index.html" class="nav-link">Главная</a>
+      <a href="./search.html" class="nav-link">Поиск</a>
+      <a href="./catalog.html" class="nav-link">Все аниме</a>
+      <a href="./chat.html" class="nav-link active">Чат</a>
+      <a href="./account.html" class="nav-link yume-account-link">Аккаунт</a>
+    </nav>
+  </header>
+
+  <main class="chat-page">
+    <section class="chat-heading">
+      <div><span class="section-kicker">СООБЩЕСТВО</span><h1>Общий чат</h1><p>Читать может любой. Чтобы отправлять сообщения, нужно зарегистрироваться.</p></div>
+      <div class="chat-online"><span class="online-dot"></span><span>Обновляется автоматически</span></div>
+    </section>
+
+    <section class="chat-shell">
+      <div id="messages" class="messages"><div class="chat-loading">Загружаем сообщения...</div></div>
+      <div id="chatGuest" class="chat-guest">
+        <span>Хочешь написать?</span>
+        <a class="btn primary" href="./account.html">Войти или зарегистрироваться</a>
+      </div>
+      <form id="chatForm" class="chat-form hidden">
+        <div id="composerAvatar" class="composer-avatar">🌙</div>
+        <textarea id="chatInput" maxlength="500" rows="1" placeholder="Написать сообщение..." required></textarea>
+        <div class="composer-side"><span id="charCount">0/500</span><button class="btn primary" type="submit">Отправить</button></div>
+      </form>
+      <div id="chatStatus" class="chat-status"></div>
+    </section>
+  </main>
+
+  <script src="./session.js?v=5"></script>
+  <script src="./chat.js?v=5"></script>
+</body>
+</html>
