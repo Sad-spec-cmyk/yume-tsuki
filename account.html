@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0a0a0f" />
-  <title>Аккаунт — Yume Tsuki</title>
-  <link rel="stylesheet" href="./styles.css?v=6" />
-  <link rel="stylesheet" href="./browse.css?v=6" />
-  <link rel="stylesheet" href="./session.css?v=6" />
-  <link rel="stylesheet" href="./account.css?v=6" />
-  <link rel="stylesheet" href="./chat-widget.css?v=6" />
+  <meta name="theme-color" content="#090a0f" />
+  <title>Профиль — Yume Tsuki</title>
+  <link rel="stylesheet" href="./styles.css?v=8" />
+  <link rel="stylesheet" href="./browse.css?v=8" />
+  <link rel="stylesheet" href="./session.css?v=8" />
+  <link rel="stylesheet" href="./account.css?v=8" />
+  <link rel="stylesheet" href="./chat-widget.css?v=8" />
 </head>
 <body>
   <div class="noise"></div>
@@ -27,22 +27,19 @@
     <section id="authView" class="auth-view">
       <div class="auth-intro">
         <span class="section-kicker">YUME ID</span>
-        <h1>Твой аккаунт</h1>
-        <p>История просмотра, персональный профиль и доступ к общему чату — всё хранится в аккаунте.</p>
+        <h1>Собери свой профиль</h1>
+        <p>История, статистика просмотра, фото профиля и общий чат сохраняются в одном аккаунте.</p>
       </div>
       <div class="auth-grid">
         <form id="loginForm" class="account-card auth-card">
-          <span class="section-kicker">ВХОД</span>
-          <h2>С возвращением</h2>
+          <span class="section-kicker">ВХОД</span><h2>С возвращением</h2>
           <label>Логин или email<input name="identity" autocomplete="username" required placeholder="username или mail@example.com"></label>
           <label>Пароль<input name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="••••••••"></label>
           <button class="btn primary" type="submit">Войти</button>
           <p class="form-status" data-status="login"></p>
         </form>
-
         <form id="registerForm" class="account-card auth-card">
-          <span class="section-kicker">РЕГИСТРАЦИЯ</span>
-          <h2>Создать аккаунт</h2>
+          <span class="section-kicker">РЕГИСТРАЦИЯ</span><h2>Создать аккаунт</h2>
           <label>Email<input name="email" type="email" autocomplete="email" required placeholder="mail@example.com"></label>
           <label>Логин<input name="username" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" placeholder="yume_user"></label>
           <label>Пароль<input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="128" placeholder="Минимум 8 символов"></label>
@@ -53,55 +50,84 @@
     </section>
 
     <section id="profileView" class="profile-view hidden">
-      <div class="profile-hero account-card">
-        <div id="profileAvatar" class="profile-avatar">🌙</div>
-        <div class="profile-main">
-          <span class="section-kicker">ПРОФИЛЬ</span>
-          <h1 id="profileName">Yume User</h1>
-          <div class="profile-handle" id="profileHandle">@user</div>
-          <p id="profileBio">Настрой профиль под себя.</p>
+      <section class="profile-shell account-card">
+        <div id="profileCover" class="profile-cover">
+          <div class="cover-grid"></div>
+          <button id="changeBannerBtn" class="cover-edit" type="button">✦ Изменить фон</button>
+          <input id="bannerFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
         </div>
-        <div class="profile-actions">
-          <button class="btn ghost" type="button" data-yume-open-chat>Открыть чат</button>
-          <button id="logoutBtn" class="btn ghost">Выйти</button>
+        <div class="profile-summary">
+          <div class="avatar-wrap">
+            <div id="profileAvatar" class="profile-avatar photo-avatar"><span id="avatarInitial">Y</span></div>
+            <button id="changeAvatarBtn" class="avatar-edit" type="button" aria-label="Изменить фото">＋</button>
+            <input id="avatarFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          </div>
+          <div class="profile-main">
+            <span class="section-kicker">ПРОФИЛЬ</span>
+            <h1 id="profileName">Yume User</h1>
+            <div class="profile-handle" id="profileHandle">@user</div>
+            <p id="profileBio">Настрой профиль под себя.</p>
+            <div class="profile-submeta"><span id="profileJoined">На Yume Tsuki</span><span>•</span><span id="profileStatus">Аккаунт активен</span></div>
+          </div>
+          <div class="profile-actions">
+            <button class="btn ghost" data-yume-open-chat type="button">Открыть чат</button>
+            <button id="logoutBtn" class="btn ghost" type="button">Выйти</button>
+          </div>
         </div>
+      </section>
+
+      <section class="stats-overview">
+        <article class="stat-tile"><span class="stat-icon">◉</span><strong id="statTitles">0</strong><small>аниме в истории</small></article>
+        <article class="stat-tile"><span class="stat-icon">▶</span><strong id="statEpisodes">0</strong><small>серий просмотрено</small></article>
+        <article class="stat-tile"><span class="stat-icon">◷</span><strong id="statHours">0 ч</strong><small>время просмотра</small></article>
+        <article class="stat-tile"><span class="stat-icon">✦</span><strong id="statStreak">0</strong><small>дней подряд</small></article>
+      </section>
+
+      <div class="profile-dashboard">
+        <section class="account-card activity-card">
+          <div class="card-head"><div><span class="section-kicker">АКТИВНОСТЬ</span><h2>Последние 14 дней</h2></div><span id="activityTotal" class="status">0 ч</span></div>
+          <div id="activityChart" class="activity-chart"></div>
+          <div class="activity-legend"><span><i></i> минуты просмотра</span><span id="activityDays">0 активных дней</span></div>
+        </section>
+
+        <section class="account-card taste-card">
+          <div class="card-head"><div><span class="section-kicker">СТАТИСТИКА</span><h2>Что ты смотришь</h2></div></div>
+          <div class="taste-layout">
+            <div id="watchDonut" class="watch-donut"><div><strong id="donutValue">0</strong><span>серий</span></div></div>
+            <div class="taste-copy"><span>Любимые жанры</span><div id="genreStats" class="genre-stats"><span class="muted">Пока недостаточно данных</span></div></div>
+          </div>
+          <div class="mini-stats"><div><strong id="completedEpisodes">0</strong><span>завершено серий</span></div><div><strong id="activityDaysSmall">0</strong><span>дней активности</span></div></div>
+        </section>
       </div>
 
-      <div class="account-grid">
+      <div class="account-grid settings-grid">
         <form id="profileForm" class="account-card customization-card">
-          <div class="card-title"><div><span class="section-kicker">КАСТОМИЗАЦИЯ</span><h2>Оформление аккаунта</h2></div><div id="previewAvatar" class="small-profile-avatar">🌙</div></div>
-          <label>Отображаемое имя<input id="displayNameInput" name="displayName" maxlength="30" required></label>
-          <label>О себе<textarea id="bioInput" name="bio" maxlength="180" rows="4" placeholder="Пару слов о себе..."></textarea></label>
-          <div class="form-row">
-            <label>Аватар-эмодзи<input id="avatarInput" name="avatar" maxlength="8" placeholder="🌙"></label>
-            <label>Цвет профиля<input id="accentInput" name="accent" type="color" value="#ff395f"></label>
-          </div>
-          <div class="avatar-presets" id="avatarPresets">
-            <button type="button">🌙</button><button type="button">🌸</button><button type="button">⚔️</button><button type="button">🦊</button><button type="button">👻</button><button type="button">🔥</button><button type="button">✨</button><button type="button">🐉</button>
-          </div>
+          <div class="card-title"><div><span class="section-kicker">КАСТОМИЗАЦИЯ</span><h2>Оформление профиля</h2></div><div id="previewAvatar" class="small-profile-avatar photo-avatar"><span>Y</span></div></div>
+          <p class="settings-note">Фото и фон загружаются отдельно сверху. Здесь меняются имя, описание и цвет профиля.</p>
+          <label>Отображаемое имя<input id="displayNameInput" name="displayName" maxlength="32" required></label>
+          <label>О себе<textarea id="bioInput" name="bio" maxlength="300" rows="5" placeholder="Пару слов о себе..."></textarea></label>
+          <label class="accent-label">Цвет профиля<div class="accent-row"><input id="accentInput" name="accent" type="color" value="#ff395f"><span id="accentValue">#ff395f</span></div></label>
           <button class="btn primary" type="submit">Сохранить профиль</button>
           <p class="form-status" data-status="profile"></p>
         </form>
 
-        <section class="account-card stats-card">
-          <span class="section-kicker">БИБЛИОТЕКА</span>
-          <h2>История просмотра</h2>
-          <div class="profile-stat"><strong id="historyCount">0</strong><span>аниме в истории</span></div>
-          <p>Тайтл добавляется автоматически, когда ты запускаешь просмотр или выбираешь серию.</p>
-          <button id="clearHistoryBtn" class="btn ghost" type="button">Очистить историю</button>
+        <section class="account-card library-card">
+          <div class="card-head"><div><span class="section-kicker">БИБЛИОТЕКА</span><h2>История просмотра</h2></div><span id="historyStatus" class="status">Загрузка...</span></div>
+          <p>Мы сохраняем тайтл, номер серии, прогресс и время просмотра. Статистика обновляется автоматически.</p>
+          <div class="library-actions"><a class="btn ghost" href="./catalog.html">Найти аниме</a><button id="clearHistoryBtn" class="btn ghost" type="button">Очистить историю</button></div>
         </section>
       </div>
 
       <section class="history-section">
-        <div class="section-head"><div><span class="section-kicker">ПРОСМОТРЕНО</span><h2>Последние просмотры</h2></div><span id="historyStatus" class="status">Загрузка...</span></div>
+        <div class="section-head"><div><span class="section-kicker">ПРОСМОТРЕНО</span><h2>Последние просмотры</h2></div><span id="historyCountBadge" class="status">0 тайтлов</span></div>
         <div id="historyGrid" class="history-grid"></div>
         <div id="historyEmpty" class="empty hidden">История пока пустая. Запусти любое аниме — оно появится здесь.</div>
       </section>
     </section>
   </main>
 
-  <script src="./session.js?v=6"></script>
-  <script src="./account.js?v=6"></script>
-  <script src="./chat-widget.js?v=6"></script>
+  <script src="./session.js?v=8"></script>
+  <script src="./account.js?v=8"></script>
+  <script src="./chat-widget.js?v=8"></script>
 </body>
 </html>
