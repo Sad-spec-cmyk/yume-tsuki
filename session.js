@@ -29,20 +29,25 @@
     return data;
   }
 
-  function ensureGlobalFeaturesCss() {
-    if (document.querySelector('link[data-yume-features]')) return;
+  function ensureStylesheet(href, marker) {
+    if (document.querySelector(`link[data-yume-${marker}]`)) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/features.css?v=10';
-    link.dataset.yumeFeatures = '1';
+    link.href = href;
+    link.dataset[`yume${marker[0].toUpperCase()}${marker.slice(1)}`] = '1';
     document.head.appendChild(link);
+  }
+  function ensureGlobalStyles() {
+    ensureStylesheet('/features.css?v=11', 'features');
+    ensureStylesheet('/ui-polish.css?v=11', 'polish');
+    ensureStylesheet('/mobile.css?v=11', 'mobile');
   }
   function ensureFavicon() {
     if (document.querySelector('link[data-yume-favicon]')) return;
     const link = document.createElement('link');
     link.rel = 'icon';
     link.type = 'image/svg+xml';
-    link.href = '/favicon.svg?v=10';
+    link.href = '/favicon.svg?v=11';
     link.dataset.yumeFavicon = '1';
     document.head.appendChild(link);
   }
@@ -219,8 +224,12 @@
   }
   function loadPageEnhancements() {
     const path = cleanPath(location.pathname);
-    if (path === '/anime') loadOptionalScript('/watch-enhancements.js?v=10', 'watch');
-    if (path === '/account') loadOptionalScript('/account-preferences.js?v=10', 'preferences');
+    if (path === '/anime') {
+      loadOptionalScript('/watch-enhancements.js?v=11', 'watch');
+      loadOptionalScript('/watch-runtime-fixes.js?v=11', 'watchfixes');
+      loadOptionalScript('/provider-sources.js?v=11', 'providers');
+    }
+    if (path === '/account') loadOptionalScript('/account-preferences.js?v=11', 'preferences');
   }
 
   window.YUME_ACCOUNT = {
@@ -239,7 +248,7 @@
     },
   };
 
-  ensureGlobalFeaturesCss();
+  ensureGlobalStyles();
   ensureFavicon();
   cleanCurrentUrl();
   ensureNavLinks();
