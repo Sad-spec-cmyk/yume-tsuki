@@ -228,6 +228,7 @@
       loadOptionalScript('/watch-enhancements.js?v=11', 'watch');
       loadOptionalScript('/watch-runtime-fixes.js?v=11', 'watchfixes');
       loadOptionalScript('/provider-sources.js?v=11', 'providers');
+      loadOptionalScript('/player-overhaul.js?v=12', 'playeroverhaul');
     }
     if (path === '/account') loadOptionalScript('/account-preferences.js?v=11', 'preferences');
   }
