@@ -181,7 +181,7 @@
   document.addEventListener('pause', event => { const video = event.target.closest?.('video'); if (video) reportVideoProgress(video, false); }, true);
   document.addEventListener('ended', event => { const video = event.target.closest?.('video'); if (video) reportVideoProgress(video, true); }, true);
   setInterval(() => {
-    const video = document.querySelector('#yumeVideo');
+    const video = document.querySelector('#yumeExternalVideo') || document.querySelector('#yumeVideo');
     if (video && !video.paused && !video.ended) reportVideoProgress(video, false);
   }, 30000);
 
@@ -229,8 +229,14 @@
       loadOptionalScript('/watch-runtime-fixes.js?v=11', 'watchfixes');
       loadOptionalScript('/provider-sources.js?v=11', 'providers');
       loadOptionalScript('/player-overhaul.js?v=12', 'playeroverhaul');
+      loadOptionalScript('/player-settings-runtime.js?v=13', 'playersettingsruntime');
     }
-    if (path === '/account') loadOptionalScript('/account-preferences.js?v=11', 'preferences');
+    if (path === '/account') {
+      loadOptionalScript('/account-preferences.js?v=11', 'preferences');
+      loadOptionalScript('/advanced-player-settings.js?v=13', 'advancedplayersettings');
+      loadOptionalScript('/profile-username.js?v=13', 'profileusername');
+    }
+    if (path === '/profile') loadOptionalScript('/public-stats-sync.js?v=13', 'publicstatssync');
   }
 
   window.YUME_ACCOUNT = {
