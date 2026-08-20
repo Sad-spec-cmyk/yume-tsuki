@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090a0f" />
+  <title>Расписание — Yume Tsuki</title>
+  <link rel="stylesheet" href="/styles.css?v=10" />
+  <link rel="stylesheet" href="/browse.css?v=10" />
+  <link rel="stylesheet" href="/session.css?v=10" />
+  <link rel="stylesheet" href="/schedule.css?v=10" />
+  <link rel="stylesheet" href="/chat-widget.css?v=10" />
+</head>
+<body data-page="schedule">
+  <div class="noise"></div>
+  <header class="topbar page-topbar">
+    <a class="brand" href="/"><span class="brand-mark">夢</span><span>YUME TSUKI</span></a>
+    <nav class="nav">
+      <a href="/" class="nav-link">Главная</a>
+      <a href="/search" class="nav-link">Поиск</a>
+      <a href="/catalog" class="nav-link">Все аниме</a>
+      <a href="/schedule" class="nav-link active yume-schedule-link">Расписание</a>
+    </nav>
+  </header>
+
+  <main class="schedule-page">
+    <section class="schedule-hero">
+      <div>
+        <span class="section-kicker">ОНГОИНГИ</span>
+        <h1>Расписание новых серий</h1>
+        <p>Сегодня, завтра и ближайшие семь дней. Данные берутся из расписания и дней публикации релизов.</p>
+      </div>
+      <div id="scheduleClock" class="schedule-clock">Обновляем...</div>
+    </section>
+
+    <section class="schedule-card">
+      <div class="schedule-card-head">
+        <div><span class="calendar-icon">▣</span><strong>РАСПИСАНИЕ ОНГОИНГОВ</strong></div>
+        <button id="scheduleRefresh" class="schedule-refresh" type="button">↻ Обновить</button>
+      </div>
+      <div id="dayTabs" class="schedule-days"></div>
+      <div id="scheduleList" class="schedule-list">
+        <div class="schedule-loading">Загружаем расписание…</div>
+      </div>
+    </section>
+
+    <section class="schedule-note">
+      <strong>Важно</strong>
+      <p>Время релиза может сдвигаться. Если API не отдаёт точное время, Yume Tsuki показывает день выхода и номер следующей серии без выдуманного времени.</p>
+    </section>
+  </main>
+
+  <script src="/config.js?v=10"></script>
+  <script src="/session.js?v=10"></script>
+  <script src="/schedule.js?v=10"></script>
+  <script src="/chat-widget.js?v=10"></script>
+</body>
+</html>

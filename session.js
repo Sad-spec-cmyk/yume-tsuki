@@ -33,7 +33,7 @@
     if (document.querySelector('link[data-yume-features]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/features.css?v=9';
+    link.href = '/features.css?v=10';
     link.dataset.yumeFeatures = '1';
     document.head.appendChild(link);
   }
@@ -42,7 +42,7 @@
     const link = document.createElement('link');
     link.rel = 'icon';
     link.type = 'image/svg+xml';
-    link.href = '/favicon.svg?v=9';
+    link.href = '/favicon.svg?v=10';
     link.dataset.yumeFavicon = '1';
     document.head.appendChild(link);
   }
@@ -80,8 +80,20 @@
   function ensureNavLinks() {
     const nav = document.querySelector('.topbar .nav');
     if (!nav) return;
-    if (!nav.querySelector('a[href*="account"]')) {
-      const account = document.createElement('a');
+
+    let account = nav.querySelector('a[href*="account"]');
+    if (!nav.querySelector('a[href*="schedule"]')) {
+      const schedule = document.createElement('a');
+      schedule.href = '/schedule';
+      schedule.className = 'nav-link yume-extra-nav yume-schedule-link';
+      schedule.textContent = 'Расписание';
+      if (account) nav.insertBefore(schedule, account);
+      else nav.appendChild(schedule);
+    }
+
+    account = nav.querySelector('a[href*="account"]');
+    if (!account) {
+      account = document.createElement('a');
       account.href = '/account';
       account.className = 'nav-link yume-extra-nav yume-account-link';
       account.textContent = 'Аккаунт';
@@ -197,6 +209,20 @@
     }
   }, true);
 
+  function loadOptionalScript(src, marker) {
+    if (document.querySelector(`script[data-yume-${marker}]`)) return;
+    const script = document.createElement('script');
+    script.src = src;
+    script.defer = true;
+    script.dataset[`yume${marker[0].toUpperCase()}${marker.slice(1)}`] = '1';
+    document.body.appendChild(script);
+  }
+  function loadPageEnhancements() {
+    const path = cleanPath(location.pathname);
+    if (path === '/anime') loadOptionalScript('/watch-enhancements.js?v=10', 'watch');
+    if (path === '/account') loadOptionalScript('/account-preferences.js?v=10', 'preferences');
+  }
+
   window.YUME_ACCOUNT = {
     get user() { return state.user; },
     get ready() { return state.ready; },
@@ -218,5 +244,6 @@
   cleanCurrentUrl();
   ensureNavLinks();
   normalizeLinks();
+  loadPageEnhancements();
   loadMe();
 })();
