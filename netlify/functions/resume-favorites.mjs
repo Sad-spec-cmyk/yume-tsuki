@@ -2,6 +2,11 @@ import { getStore, getDeployStore } from '@netlify/blobs';
 import crypto from 'node:crypto';
 
 const SESSION_COOKIE = 'yume_session';
+const PARTY_TTL = 1000 * 60 * 60 * 6;
+const DEFAULT_PREFS = {
+  autoSkipOpening: true,
+  autoNextEpisode: true,
+};
 
 function isProduction() {
   const context = globalThis.Netlify?.context?.deploy?.context || process.env.CONTEXT || '';
@@ -20,6 +25,8 @@ const sessions = () => store('yume-sessions', true);
 const history = () => store('yume-history', true);
 const resumeStore = () => store('yume-resume', true);
 const favoritesStore = () => store('yume-favorites', true);
+const preferencesStore = () => store('yume-preferences', true);
+const partyStore = () => store('yume-watch-parties', true);
 
 const sha256 = value => crypto.createHash('sha256').update(String(value)).digest('hex');
 const cleanUsername = value => String(value || '').trim().toLowerCase();
@@ -76,6 +83,28 @@ function cleanFavorite(data = {}) {
     year: String(data.year || '').slice(0, 20),
     type: String(data.type || '').slice(0, 80),
     addedAt: Date.now(),
+  };
+}
+function cleanPreferences(data = {}) {
+  return {
+    autoSkipOpening: data.autoSkipOpening !== false,
+    autoNextEpisode: data.autoNextEpisode !== false,
+    updatedAt: Date.now(),
+  };
+}
+function cleanPartyCode(value) {
+  return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+}
+function cleanPartyState(data = {}) {
+  return {
+    episodeIndex: num(data.episodeIndex, 0, 10000),
+    episodeNumber: String(data.episodeNumber ?? '').slice(0, 40),
+    position: num(data.position, 0, 60 * 60 * 24),
+    duration: num(data.duration, 0, 60 * 60 * 24),
+    quality: String(data.quality || '').slice(0, 20),
+    playing: Boolean(data.playing),
+    provider: String(data.provider || 'aniliberty').slice(0, 40),
+    updatedAt: Date.now(),
   };
 }
 
@@ -141,6 +170,100 @@ async function handleFavorites(request, url) {
   return json({ ok: true, item }, 201);
 }
 
+async function handlePreferences(request) {
+  const user = await sessionUser(request);
+  if (!user) return json({ error: 'Нужно войти в аккаунт.' }, 401);
+  const ps = preferencesStore();
+  const key = `u/${user.id}`;
+  if (request.method === 'GET') {
+    const stored = await ps.get(key, { type: 'json' });
+    return json({ preferences: { ...DEFAULT_PREFS, ...(stored || {}) } });
+  }
+  if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+  const preferences = cleanPreferences(await body(request));
+  await ps.setJSON(key, preferences);
+  return json({ ok: true, preferences });
+}
+
+async function createParty(request, data) {
+  const user = await sessionUser(request);
+  if (!user) return json({ error: 'Чтобы создать комнату, войдите в аккаунт.' }, 401);
+  let room = '';
+  const ps = partyStore();
+  for (let i = 0; i < 8; i++) {
+    room = crypto.randomBytes(4).toString('hex').toUpperCase();
+    if (!await ps.get(`r/${room}`, { type: 'json' })) break;
+  }
+  const anime = {
+    alias: String(data.alias || '').slice(0, 180),
+    animeId: String(data.animeId || '').slice(0, 120),
+    title: String(data.title || '').trim().slice(0, 180),
+  };
+  if (!anime.alias && !anime.animeId && !anime.title) return json({ error: 'Не удалось определить аниме.' }, 400);
+  const item = {
+    room,
+    hostId: user.id,
+    host: safeUser(user),
+    anime,
+    state: cleanPartyState(data),
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    expiresAt: Date.now() + PARTY_TTL,
+  };
+  await ps.setJSON(`r/${room}`, item);
+  return json({
+    room,
+    host: item.host,
+    anime: item.anime,
+    state: item.state,
+    expiresAt: item.expiresAt,
+  }, 201);
+}
+async function updateParty(request, data) {
+  const user = await sessionUser(request);
+  if (!user) return json({ error: 'Нужно войти в аккаунт.' }, 401);
+  const room = cleanPartyCode(data.room);
+  if (!room) return json({ error: 'Не указана комната.' }, 400);
+  const ps = partyStore();
+  const item = await ps.get(`r/${room}`, { type: 'json' });
+  if (!item || Number(item.expiresAt) < Date.now()) return json({ error: 'Комната уже закрыта.' }, 404);
+  if (item.hostId !== user.id) return json({ error: 'Управлять комнатой может только создатель.' }, 403);
+  const updated = {
+    ...item,
+    state: cleanPartyState(data),
+    updatedAt: Date.now(),
+    expiresAt: Date.now() + PARTY_TTL,
+  };
+  await ps.setJSON(`r/${room}`, updated);
+  return json({ ok: true, room, state: updated.state, expiresAt: updated.expiresAt });
+}
+async function readParty(url) {
+  const room = cleanPartyCode(url.searchParams.get('room'));
+  if (!room) return json({ error: 'Не указана комната.' }, 400);
+  const ps = partyStore();
+  const item = await ps.get(`r/${room}`, { type: 'json' });
+  if (!item || Number(item.expiresAt) < Date.now()) {
+    if (item) await ps.delete(`r/${room}`);
+    return json({ error: 'Комната не найдена или уже закрыта.' }, 404);
+  }
+  return json({
+    room,
+    host: item.host,
+    anime: item.anime,
+    state: item.state,
+    updatedAt: item.updatedAt,
+    expiresAt: item.expiresAt,
+  });
+}
+async function handleParty(request, url) {
+  if (request.method === 'GET') return readParty(url);
+  if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+  const data = await body(request);
+  const op = String(data.op || 'update');
+  if (op === 'create') return createParty(request, data);
+  return updateParty(request, data);
+}
+
 async function publicStats(userId) {
   const hs = history();
   const prefix = `u/${userId}/`;
@@ -183,6 +306,8 @@ export default async request => {
   try {
     if (action === 'resume') return handleResume(request, url);
     if (action === 'favorites') return handleFavorites(request, url);
+    if (action === 'preferences') return handlePreferences(request);
+    if (action === 'party') return handleParty(request, url);
     if (action === 'public-profile' && request.method === 'GET') return handlePublicProfile(url);
     return json({ error: 'Unknown action' }, 404);
   } catch (error) {
