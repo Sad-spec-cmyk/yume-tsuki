@@ -1,12 +1,8 @@
 window.YUME_CONFIG = {
-  // Основной и резервный адреса публичного AniLiberty API v1.
-  // AniLiberty больше не является единственным каталогом: federated runtime ниже добавляет Jikan + Shikimori.
   ANILIBERTY_API_BASES: [
     "https://api.anilibria.app/api/v1",
     "https://aniliberty.top/api/v1"
   ],
-
-  // AniLiberty часто возвращает poster.src как относительный путь.
   ANILIBERTY_IMAGE_BASES: [
     "https://static.wwnd.space",
     "https://cdn.anilibria.top",
@@ -16,20 +12,36 @@ window.YUME_CONFIG = {
 };
 
 (() => {
-  // One real site icon everywhere. Remove the old assistant-made moon favicon and bust browser cache.
-  document.querySelectorAll('link[rel~="icon"]').forEach(x => x.remove());
-  const svg = document.createElement('link');
-  svg.rel = 'icon'; svg.type = 'image/svg+xml'; svg.href = '/favicon.svg?v=16';
-  document.head.appendChild(svg);
+  // Exact crescent icon supplied for Yume Tsuki.
+  document.querySelectorAll('link[rel~="icon"], link[rel="shortcut icon"]').forEach(node => node.remove());
+  const icon = document.createElement('link');
+  icon.rel = 'icon';
+  icon.type = 'image/png';
+  icon.sizes = '64x64';
+  icon.href = '/favicon.png?v=18';
+  document.head.appendChild(icon);
 
-  // This must execute before app.js / browse.js / anime.js so their old AniLiberty calls become federated calls.
+  const shortcut = document.createElement('link');
+  shortcut.rel = 'shortcut icon';
+  shortcut.type = 'image/x-icon';
+  shortcut.href = '/favicon.ico?v=18';
+  document.head.appendChild(shortcut);
+
   if (!window.__YUME_FEDERATED_CATALOG_V16) {
     if (document.readyState === 'loading') {
-      document.write('<script src="/federated-catalog-v16.js?v=16"><\/script>');
+      document.write('<script src="/federated-catalog-v16.js?v=18"><\/script>');
     } else {
       const script = document.createElement('script');
-      script.src = '/federated-catalog-v16.js?v=16';
+      script.src = '/federated-catalog-v16.js?v=18';
       document.head.appendChild(script);
     }
+  }
+
+  // The native AniLiberty renderer can show “Видео недоступно” before an external
+  // AnimeVost/Yummy/Kodik stream connects. Remove that stale overlay after real playback starts.
+  if (document.body?.dataset?.page === 'anime' && !window.__YUME_EXTERNAL_PLAYBACK_FIX_V18) {
+    const fix = document.createElement('script');
+    fix.src = '/external-playback-hotfix-v18.js?v=18';
+    document.head.appendChild(fix);
   }
 })();
